@@ -76,7 +76,7 @@ function prepareSpeech(){
 }
 function speakWord(word,key,btn){
   if(!('speechSynthesis' in window)){
-    alert('이 브라우저에서는 발음 재생을 지원하지 않습니다. Safari 또는 Chrome 최신 버전으로 열어 주세요.');
+    return;
     return;
   }
   if(isAppleDevice() && !speechReady){prepareSpeech();}
@@ -95,7 +95,7 @@ function speakWord(word,key,btn){
     btn.classList.remove('playing');
     btn.textContent=state[key]?'✅':'🔊';
     if(isAppleDevice()){
-      alert('발음이 재생되지 않았습니다. Safari/Chrome에서 열고, 상단의 「」를 한 번 누른 뒤 다시 시도해 주세요.');
+      
     }
   };
   window.speechSynthesis.speak(u);
@@ -106,14 +106,7 @@ function speakWord(word,key,btn){
   },250);
 }
 if('speechSynthesis' in window){window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();}
-document.addEventListener('DOMContentLoaded',()=>{
-  if(isAppleDevice()){
-    const g=document.getElementById('iosGuide');
-    if(g)g.classList.add('show');
-  }
-  const r=document.getElementById('audioReady');
-  if(r)r.onclick=prepareSpeech;
-});
+
 function entryHTML(e,it,idx){const m=e.match(/^([^【]+)\s*(.*)$/); const word=m?m[1].trim():e; const rest=m?m[2]:''; const key=entryKey(it,idx); const checked=isEntryDone(it,idx); return `<div class="entry ${checked?'done':''}"><div><span class="w">${word}</span><button class="say ${checked?'done':''}" type="button" data-word="${esc(word)}" data-k="${key}" data-done="${checked?'1':'0'}" title="${esc(word)} 발음 듣기">${checked?'✅':'🔊'}</button> <span class="meaning">${rest}</span></div><label class="check"><input type="checkbox" data-k="${key}" ${checked?'checked':''} disabled> 확인</label></div>`}
 function render(){const q=search.value.trim().toLowerCase();const f=filter.value;let shown=ITEMS.filter(it=>{const txt=(it.head+' '+it.family.join(' ')).toLowerCase(); const done=isFamilyDone(it); return (!q||txt.includes(q))&&(activeLetter==='ALL'||it.initial===activeLetter)&&(f==='all'||(f==='done'&&done)||(f==='todo'&&!done));});grid.innerHTML=shown.map(it=>`<article class="card ${isFamilyDone(it)?'done':''}"><div class="top"><div><div class="rank">#${it.rank}</div><div class="head">${it.head}</div></div></div><div class="fam">${it.family.map((e,idx)=>entryHTML(e,it,idx)).join('')}</div></article>`).join('');grid.querySelectorAll('input[type=checkbox]').forEach(c=>c.onchange=e=>{state[e.target.dataset.k]=e.target.checked;if(!e.target.checked)delete state[e.target.dataset.k];save();render();});
 grid.querySelectorAll('.say').forEach(b=>b.onclick=e=>speakWord(e.currentTarget.dataset.word,e.currentTarget.dataset.k,e.currentTarget));
